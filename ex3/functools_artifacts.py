@@ -50,6 +50,7 @@ def spell_dispatcher() -> callable:
 
 
 def main():
+    # TODO verif main and fibo (memoized)
     print("\nTesting spell_reducer...")
     spells = [10, 20, 5]
     print("Sum:", spell_reducer(spells, "add"))
