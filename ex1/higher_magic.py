@@ -80,6 +80,7 @@ def main():
     sequence = spell_sequence(spell_list)()
     for spell in sequence:
         print(spell("Dragon"))
+    print()
 
 
 if __name__ == "__main__":
