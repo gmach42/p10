@@ -1,5 +1,6 @@
 # functools, operator
 from functools import reduce, partial, lru_cache
+import functools
 from operator import add, mul
 
 
@@ -16,14 +17,11 @@ def spell_reducer(spells: list[int], operation: str) -> int:
 
 
 def partial_enchanter(base_enchantment: callable) -> dict[str, callable]:
-    fire_enchanter = partial(base_enchantment, "Fire_encha")
-    ice_enchanter = partial(base_enchantment, "Ice")
-    lightning_enchanter = partial(base_enchantment, "Lightning")
     return {
-        "fire": fire_enchanter,
-        "ice": ice_enchanter,
-        "lightning": lightning_enchanter,
-    }
+        'fire_enchant': partial(base_enchantment, 50, 'fire'),
+        'ice_enchant': partial(base_enchantment, 50, 'ice'),
+        'lightning_enchant': partial(base_enchantment, 50, 'lightning')
+        }
 
 
 def memoized_fibonacci(n: int) -> int:
