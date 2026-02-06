@@ -31,8 +31,7 @@ def memory_vault() -> dict[str, callable]:
     memory = {}
 
     def store(key, value) -> dict:
-        nonlocal memory
-        memory = {key: value}
+        memory[key] = value
         return memory
 
     def recall(key):
@@ -67,6 +66,8 @@ def main():
     print("Recalling valid data: ", end="")
     print(vault["recall"]("Precious_data"))
     print("Recalling missing data: ", end="")
+    print(vault["store"]("Other_data", 100))
+    print(vault["recall"]("Precious_data"))
     print(vault["recall"]("Missing_data"), "\n")
 
 
