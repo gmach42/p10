@@ -55,6 +55,7 @@ def main():
         "\n".join(
             [f"{key}: {values}" for key, values in mage_stats(mages).items()])
     )
+    print()
 
 
 if __name__ == "__main__":
