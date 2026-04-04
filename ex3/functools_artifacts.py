@@ -1,82 +1,82 @@
-# functools, operator
-from functools import reduce, partial, lru_cache
 import functools
-from operator import add, mul
+import operator
+from typing import Any
+from collections.abc import Callable
 
 
 def spell_reducer(spells: list[int], operation: str) -> int:
+    if not spells:
+        return 0
     ops = {
-        "add": add,
-        "multiply": mul,
-        "max": max,
-        "min": min,
+        "add": operator.add,
+        "multiply": operator.mul,
+        "max": lambda a, b: a if a > b else b,
+        "min": lambda a, b: a if a < b else b,
     }
     if operation not in ops:
-        return "Invalid operation"
-    return reduce(ops[operation], spells)
+        raise ValueError(f"Unknown operation: {operation}")
+    return functools.reduce(ops[operation], spells)
 
 
-def partial_enchanter(base_enchantment: callable) -> dict[str, callable]:
+def partial_enchanter(base_enchantment: Callable) -> dict[str, Callable]:
     return {
-        'fire_enchant': partial(base_enchantment, 50, 'fire'),
-        'ice_enchant': partial(base_enchantment, 50, 'ice'),
-        'lightning_enchant': partial(base_enchantment, 50, 'lightning')
-        }
+        "fire":
+        functools.partial(base_enchantment, power=50, element="fire"),
+        "ice":
+        functools.partial(base_enchantment, power=50, element="ice"),
+        "lightning":
+        functools.partial(base_enchantment, power=50, element="lightning"),
+    }
 
 
+@functools.lru_cache(maxsize=None)
 def memoized_fibonacci(n: int) -> int:
-    @lru_cache(maxsize=None)
-    def fib(k: int) -> int:
-        if k <= 1:
-            return k
-        return fib(k - 1) + fib(k - 2)
-
-    return fib(n)
+    if n <= 0:
+        return 0
+    if n == 1:
+        return 1
+    return memoized_fibonacci(n - 1) + memoized_fibonacci(n - 2)
 
 
-def spell_dispatcher() -> callable:
-    @lru_cache(maxsize=None)
-    def dispatcher(spell_name: str) -> str:
-        spells = {
-            "fireball": "Casting Fireball!",
-            "heal": "Casting Heal!",
-            "lightning": "Casting Lightning!",
-        }
-        return spells.get(spell_name, "Unknown spell")
+def spell_dispatcher() -> Callable[[Any], str]:
 
-    return dispatcher
+    @functools.singledispatch
+    def dispatch(spell):
+        return "Unknown spell type"
+
+    @dispatch.register(int)
+    def handle_int(spell):
+        return f"Damage spell: {spell} damage"
+
+    @dispatch.register(str)
+    def handle_str(spell):
+        return f"Enchantment: {spell}"
+
+    @dispatch.register(list)
+    def handle_list(spell):
+        return f"Multi-cast: {len(spell)} spells"
+
+    return dispatch
 
 
-def main():
-    # TODO verif main and fibo (memoized)
-    print("\nTesting spell_reducer...")
-    spells = [10, 20, 5]
-    print("Sum:", spell_reducer(spells, "add"))
-    print("Product:", spell_reducer(spells, "multiply"))
-    print("Max:", spell_reducer(spells, "max"))
-    print("Min:", spell_reducer(spells, "min"))
-    print("Invalid operation:", spell_reducer(spells, "divide"))
+def main() -> None:
 
-    print("\nTesting partial_enchanter...")
+    print("Testing spell reducer...")
+    print(f"Sum: {spell_reducer([10, 20, 30, 40], 'add')}")
+    print(f"Product: {spell_reducer([10, 20, 30, 40], 'multiply')}")
+    print(f"Max: {spell_reducer([10, 20, 30, 40], 'max')}")
 
-    def base_enchantment(element: str, item: str) -> str:
-        return f"{element} Enchantment on {item}"
+    print("\nTesting memoized fibonacci...")
+    for n in [0, 1, 10, 15]:
+        print(f"Fib({n}): {memoized_fibonacci(n)}")
 
-    enchanters = partial_enchanter(base_enchantment)
-    print(enchanters["fire"]("Sword"))
-    print(enchanters["ice"]("Shield"))
-    print(enchanters["lightning"]("Bow"))
-
-    print("\nTesting memoized_fibonacci...")
-    for i in range(10):
-        print(f"Fibonacci({i}) = {memoized_fibonacci(i)}")
-
-    print("\nTesting spell_dispatcher...")
-    dispatcher = spell_dispatcher()
-    print(dispatcher("fireball"))
-    print(dispatcher("heal"))
-    print(dispatcher("lightning"))
-    print(dispatcher("unknown_spell"), "\n")
+    print("\nTesting spell dispatcher...")
+    dispatch = spell_dispatcher()
+    print(dispatch(42))
+    print(dispatch("fireball"))
+    print(dispatch([1, 2, 3]))
+    print(dispatch(3.14))
+    print()
 
 
 if __name__ == "__main__":

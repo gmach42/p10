@@ -13,9 +13,16 @@ def spell_transformer(spells: list[str]) -> list[str]:
 
 
 def mage_stats(mages: list[dict]) -> dict:
+    if not mages:
+        return {
+            "most_powerful": None,
+            "least_powerful": None,
+            "average_power": 0,
+        }
     most_powerful = max(mages, key=lambda x: x["power"])
     least_powerful = min(mages, key=lambda x: x["power"])
-    average_power = sum(map(lambda x: x["power"], mages)) / len(mages)
+    average_power = round(
+        sum(map(lambda x: x["power"], mages)) / len(mages), 2)
     return {
         "most_powerful": most_powerful,
         "least_powerful": least_powerful,
@@ -23,7 +30,7 @@ def mage_stats(mages: list[dict]) -> dict:
     }
 
 
-def main():
+def main() -> None:
     artifacts = [
         {"name": "Ice Wand", "power": 90, "type": "armor"},
         {"name": "Water Chalice", "power": 74, "type": "weapon"},
@@ -31,11 +38,11 @@ def main():
         {"name": "Crystal Orb", "power": 81, "type": "relic"},
     ]
     mages = [
-        {"name": "River", "power": 58, "element": "fire"},
-        {"name": "Morgan", "power": 62, "element": "wind"},
-        {"name": "Sage", "power": 67, "element": "ice"},
-        {"name": "Morgan", "power": 51, "element": "earth"},
-        {"name": "Ash", "power": 62, "element": "earth"},
+        {"name": "River", "power": 58.14, "element": "fire"},
+        {"name": "Morgan", "power": 62.44783, "element": "wind"},
+        {"name": "Sage", "power": 67.44433, "element": "ice"},
+        {"name": "Morgan", "power": 888, "element": "earth"},
+        {"name": "Ash", "power": 2, "element": "earth"},
     ]
     spells = ["shield", "tsunami", "blizzard", "tornado"]
 
@@ -44,9 +51,10 @@ def main():
         "\n".join([f"{artifact}" for artifact in artifact_sorter(artifacts)])
     )
 
-    print("\nTesting power filter...")
+    print("\nTesting power filter -> mages with > 60 power:")
     filtered_mages = power_filter(mages, 60)
     print("\n".join([f"{mage}" for mage in filtered_mages]))
+
     print("\nTesting spell transformer...")
     print(" ".join(spell_transformer(spells)))
 

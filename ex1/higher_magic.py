@@ -1,85 +1,64 @@
-def spell_combiner(spell1: callable, spell2: callable) -> callable:
-    def combined_spell(target: str) -> tuple:
-        return (spell1(target), spell2(target))
+from collections.abc import Callable
+
+
+def spell_combiner(spell1: Callable, spell2: Callable) -> Callable:
+    def combined_spell(target: str, power: int) -> tuple[Callable, Callable]:
+        return (spell1(target, power), spell2(target, power))
     return combined_spell
 
 
-def power_amplifier(base_spell: callable, multiplier: int) -> callable:
-    def amplified_spell() -> int:
-        return base_spell() * multiplier
+def power_amplifier(base_spell: Callable, multiplier: int) -> Callable:
+    def amplified_spell(target: str, power: int) -> Callable:
+        return base_spell(target, power * multiplier)
     return amplified_spell
 
 
-def conditional_caster(condition: callable, spell: callable) -> callable:
-    def castable(target: str) -> callable:
+def conditional_caster(condition: Callable, spell: Callable) -> Callable:
+    def castable(target: str, power: int) -> Callable:
         if condition is True:
-            return spell(target)
+            return spell(target, power)
         else:
             return "Spell fizzled"
     return castable
 
 
-def spell_sequence(spells: list[callable]) -> callable:
-    def cast_in_order() -> list:
+def spell_sequence(spells: list[Callable]) -> Callable:
+    def cast_in_order(target: str, power: int) -> list[Callable]:
         results = []
         for spell in spells:
-            results.append(spell)
+            results.append(spell(target, power))
         return results
     return cast_in_order
 
 
-class Spell:
-    def __init__(self, name: str, type: str, power: int):
-        self.name = name
-        self.type = type
-        self.power = power
-
-    def play_spell(self, target: str):
-        if self.type == "harmfull":
-            return f"{self.name} hits {target}"
-        return f"{self.name} {target}"
-
-    def spell_power(self) -> int:
-        return self.power
+def heal(target: str, power: int) -> str:
+    return f"Heal restores {target} for {power} HP"
 
 
-# def fireball(target: str) -> int:
-#     print(f"Fireball hits {target}", end=", ")
-#     return 10
+def fireball(target: str, power: int) -> str:
+    return f"Fireball hits {target} for {power} HP"
 
 
-# def heal(target: str) -> int:
-#     print(f"Heal {target}")
-#     return 8
-
-
-def main():
+def main() -> None:
     # initialize spells
-    fireball = Spell("Fireball", "harmfull", 10)
-    heal = Spell("Heal", "helpfull", 8)
-
     print("\nTesting spell combiner...")
-    combined_spell = spell_combiner(fireball.play_spell, heal.play_spell)
-    result1, result2 = combined_spell("Dragon")
-    print(f"Combined spell results: {result1}, {result2}")
-    print(combined_spell("Dragon"))
+    combined_spell = spell_combiner(fireball, heal)
+    print(combined_spell("Dragon", 5))
 
     print("\nTesting power amplifier...")
-    mega_fireball = power_amplifier(fireball.spell_power, 3)
-    damage = mega_fireball()
-    print(f"Mega Fireball deals {damage} damage")
+    mega_fireball = power_amplifier(fireball, 3)
+    print(f"Original spell: {fireball('Dragon', 5)}")
+    print(f"Augmented spell: {mega_fireball('Dragon', 5)}")
 
     print("\nTesting conditional caster...")
-    missed_cast = conditional_caster(False, fireball.play_spell)
-    print(f"Missed cast: {missed_cast('Dragon')}")
-    successful_cast = conditional_caster(True, heal.play_spell)
-    print(f"Successful cast: {successful_cast('Dragon')}")
+    missed_cast = conditional_caster(False, fireball)
+    print(missed_cast("Dragon", 5))
+    successful_cast = conditional_caster(True, heal)
+    print(successful_cast("Dragon", 3))
 
     print("\nTesting spell sequence...")
-    spell_list = [fireball.play_spell, heal.play_spell, fireball.play_spell]
-    sequence = spell_sequence(spell_list)()
-    for spell in sequence:
-        print(spell("Dragon"))
+    spell_list = [fireball, heal, fireball]
+    print(spell_sequence(spell_list)("Dragon", 5))
     print()
 
 
